@@ -9,10 +9,10 @@ namespace ClientServer
     {
         static void Main(string[] args)
         {
-            const string ip = "192.168.1.2";
-            const int port = 8080;
+            const string ip = "127.0.0.1";
+            const int port = 8081;
 
-            #region TCP
+            #region TCP Server
 
             //var tcpEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
 
@@ -45,7 +45,7 @@ namespace ClientServer
 
             #endregion
 
-            #region UDP
+            #region UDP Server
 
             var udpEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
 
@@ -53,12 +53,26 @@ namespace ClientServer
 
             udpSocket.Bind(udpEndPoint);
 
-            var buffer = new byte[256];
-            var size = 0;
-            var data = new StringBuilder();
+            while (true)
+            {
+                var buffer = new byte[256];
+                var size = 0;
+                var data = new StringBuilder();
+                EndPoint senderEndPoint = new IPEndPoint(IPAddress.Any, 0);
 
-            var listenerEndPoint = new IPEndPoint(IPAddress.Any, 0);
+                do
+                {
+                    size = udpSocket.ReceiveFrom(buffer, ref senderEndPoint);
+                    data.Append(Encoding.UTF8.GetString(buffer));
+                }
+                while (udpSocket.Available > 0);
 
+                udpSocket.SendTo(Encoding.UTF8.GetBytes("Сообщение получено!"), senderEndPoint);
+
+                Console.WriteLine(data);
+            }
+
+            // TODO: Close Socket
 
             #endregion
         }
